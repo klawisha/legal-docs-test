@@ -1,7 +1,5 @@
-import pdfMake from "pdfmake/build/pdfmake.js";
-import pdfFonts from "pdfmake/build/vfs_fonts.js";
-
-pdfMake.vfs = pdfFonts.pdfMake.vfs;
+import PDFDocument from "pdfkit";
+import { Buffer } from "buffer";
 
 export default async function handler(req, res) {
   try {
@@ -10,26 +8,27 @@ export default async function handler(req, res) {
 
     const text = decodeURIComponent(Buffer.from(token, "base64").toString());
 
-    const docDefinition = {
-      content: [
-        { text: "ОФИЦИАЛЬНЫЙ ДОКУМЕНТ", style: "header" },
-        text
-      ],
-      styles: { header: { fontSize: 16, bold: true } }
-    };
+    const doc = new PDFDocument();
+    const buffers = [];
 
-    const pdf = pdfMake.createPdf(docDefinition);
-
-    pdf.getBuffer((buffer) => {
+    doc.on("data", (chunk) => buffers.push(chunk));
+    doc.on("end", () => {
+      const pdfData = Buffer.concat(buffers);
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
         "attachment; filename=document.pdf"
       );
-      res.send(buffer);
+      res.send(pdfData);
     });
+
+    doc.fontSize(20).text("ОФИЦИАЛЬНЫЙ ДОКУМЕНТ", { align: "center" });
+    doc.moveDown();
+    doc.fontSize(14).text(text);
+
+    doc.end();
   } catch (e) {
-    console.error("API export error:", e);
+    console.error("PDF generation error:", e);
     res.status(500).json({ error: e.message });
   }
 }

@@ -6,29 +6,21 @@ const country = document.getElementById("country");
 const details = document.getElementById("details");
 
 document.getElementById("gen").onclick = async () => {
-  try {
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: name.value,
-        country: country.value,
-        details: details.value
-      })
-    });
+  // тестовая генерация текста без OpenAI
+  const text = `
+От имени: ${name.value}
+Страна: ${country.value}
+Описание: ${details.value}
 
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
+[Тестовая жалоба сгенерирована автоматически для проверки PDF.]
+`;
 
-    result.textContent = data.text;
+  result.textContent = text;
 
-    const token = btoa(unescape(encodeURIComponent(data.text)));
-    localStorage.setItem("doc_token", token);
+  const token = btoa(unescape(encodeURIComponent(text)));
+  localStorage.setItem("doc_token", token);
 
-    test.style.display = "block";
-  } catch (e) {
-    alert("Ошибка генерации: " + e.message);
-  }
+  test.style.display = "block";
 };
 
 test.onclick = () => {
