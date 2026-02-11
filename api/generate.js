@@ -2,7 +2,16 @@ import OpenAI from "openai";
 
 export default async function handler(req, res) {
   try {
-    const { name, country, details } = req.body;
+    if (req.method !== "POST")
+      return res.status(405).json({ error: "Method not allowed" });
+
+    // --- parse body manually ---
+    const chunks = [];
+    for await (const chunk of req) {
+      chunks.push(chunk);
+    }
+    const rawBody = Buffer.concat(chunks).toString();
+    const { name, country, details } = JSON.parse(rawBody);
 
     if (!name || !country || !details)
       return res.status(400).json({ error: "missing fields" });
