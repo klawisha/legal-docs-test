@@ -1,6 +1,10 @@
 const result = document.getElementById("result");
 const test = document.getElementById("test");
 
+const name = document.getElementById("name");
+const country = document.getElementById("country");
+const details = document.getElementById("details");
+
 document.getElementById("gen").onclick = async () => {
   try {
     const res = await fetch("/api/generate", {
